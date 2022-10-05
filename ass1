@@ -1,0 +1,97 @@
+pipeline{
+	
+	agent {
+	    node{
+		    label 'built-in'
+		    customWorkspace '/mnt/data/'
+	    }
+	}
+
+	stages{
+	    
+	    stage('install httpd on slave-1'){
+			agent{
+				node{
+					label 'qa'
+				}
+			}
+
+			steps{
+			    sh 'sudo rm -rf *'
+				sh 'sudo yum install httpd -y'
+				sh 'sudo service httpd start'
+				sh 'sudo chmod -R 777 /var/www/html'
+			}
+		}
+		
+		
+	    
+		stage('clone git repo with branch 22Q1'){
+			steps{
+				dir('/mnt/data/22Q1'){
+					sh 'rm -rf *'
+					sh 'git clone https://github.com/bharshad/multi_branch_app.git -b 22Q1'
+					sh 'chmod -R 777 /mnt/data/22Q1/multi_branch_app/index.html'
+				    sh 'scp -i "/mnt/linux-demo.pem" /mnt/data/22Q1/multi_branch_app/index.html ec2-user@172.31.34.207:/var/www/html'
+				}
+			}	
+		}
+		
+		stage('install httpd on slave-2'){
+			agent{
+				label{
+					label '172.31.44.233'
+				}
+			}
+
+			steps{
+			    sh 'sudo rm -rf *'
+				sh 'sudo yum install httpd -y'
+				sh 'sudo service httpd start'
+				sh 'sudo chmod -R 777 /var'
+			}
+		}
+		
+		
+		stage('clone git repo with branch 22Q2'){
+			steps{
+				dir('/mnt/data/22Q2'){
+					sh 'rm -rf *'
+					sh 'git clone https://github.com/bharshad/multi_branch_app.git -b 22Q2'
+					sh 'chmod -R 777 /mnt/data/22Q2/multi_branch_app/index.html'
+				    sh 'scp -i "/mnt/linux-demo.pem" /mnt/data/22Q2/multi_branch_app/index.html ec2-user@172.31.44.233:/var/www/html'
+					}
+			}	
+		}
+		
+		stage('install httpd on slave-3'){
+			agent{
+				label{
+					label '172.31.44.99'
+				}
+			}
+
+			steps{
+			    sh 'sudo rm -rf *'
+				sh 'sudo yum install httpd -y'
+				sh 'sudo service httpd start'
+				sh 'sudo chmod -R 777 /var'
+			}
+		}
+		
+		stage('clone git repo with branch 22Q3'){
+			steps{
+				dir('/mnt/data/22Q3'){
+					sh 'rm -rf *'
+					sh 'git clone https://github.com/bharshad/multi_branch_app.git -b 22Q3'
+					sh 'chmod -R 777 /mnt/data/22Q3/multi_branch_app/index.html'
+				    sh 'scp -i "/mnt/linux-demo.pem" /mnt/data/22Q3/multi_branch_app/index.html ec2-user@172.31.44.99:/var/www/html'
+					}
+			}	
+		}
+
+		
+
+		
+	}
+}
